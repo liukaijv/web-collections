@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="js/xlsx.full.min.js"></script>
+</head>
+
+<body>
+<input type="file" onchange="importFile(this)"/>
+<div id="demo"></div>
+<script>
+
+    var readBase64 = true;
+
+    function importFile(obj) {
+        if (!obj.files) {
+            return;
+        }
+        var file = obj.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var data = e.target.result;
+            var binaryData;
+            if (readBase64) {
+                binaryData = XLSX.read(btoa(bufferToBinaryString(data)), {
+                    type: 'base64'
+                });
+            } else {
+                binaryData = XLSX.read(data, {
+                    type: 'binary'
+                });
+            }
+            document.getElementById("demo").innerHTML = JSON.stringify(XLSX.utils.sheet_to_json(binaryData.Sheets[binaryData.SheetNames[0]]));
+        };
+        if (readBase64) {
+            reader.readAsArrayBuffer(file);
+        } else {
+            reader.readAsBinaryString(file);
+        }
+    }
+
+    function bufferToBinaryString(data) {
+        var out = '',
+            l = 0,
+            w = 10240;
+        for (; l < data.byteLength / w; ++l) out += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w, l * w + w)));
+        out += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
+        return out;
+    }
+
+</script>
+</body>
+
+</html>
